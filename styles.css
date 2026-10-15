@@ -57,6 +57,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline:3px solid r
 .toolbar-btn { width:39px; height:39px; display:grid; place-items:center; border:1px solid rgba(255,255,255,.58); background:var(--surface); box-shadow:var(--shadow); border-radius:13px; color:var(--muted); transition: transform .2s ease, background .2s ease; }
 .toolbar-btn:hover { transform:translateY(-2px); background:var(--surface-hover); color:var(--text); }
 .toolbar-btn svg { width:18px; height:18px; }
+.embedded-close-button { display:none; }
+html.embedded-view .embedded-close-button { display:grid; }
 .main-content { width:min(1000px,calc(100% - 80px)); margin:0 auto; padding-top: 100px; }
 .favorites-section { min-height:320px; }
 .section-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:26px; }
@@ -197,6 +199,8 @@ html.popup-view body {
   overflow-x: hidden; overflow-y: auto;
   scrollbar-width: thin; scrollbar-color: rgba(148,163,194,.28) transparent;
 }
+html.popup-view.embedded-view { width:100%; max-width:none; height:100%; min-height:0; }
+html.popup-view.embedded-view body { width:100%; max-width:none; height:100%; min-height:0; }
 html.popup-view .ambient-one { width: 280px; height: 280px; left: -110px; top: 18%; }
 html.popup-view .ambient-two { width: 270px; height: 270px; right: -90px; bottom: -100px; }
 html.popup-view .ambient-three { width: 170px; height: 170px; top: -115px; }

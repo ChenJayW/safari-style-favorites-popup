@@ -16,6 +16,9 @@ const DRAG_SCROLL_EDGE = 72;
 const DRAG_SCROLL_MAX_STEP = 18;
 const SCROLL_SAVE_DELAY = 140;
 const systemThemeQuery = matchMedia('(prefers-color-scheme: dark)');
+const embeddedMode = new URLSearchParams(location.search).get('embedded') === '1';
+
+if (embeddedMode) document.documentElement.classList.add('embedded-view');
 
 // Preview data and browser API adapters
 // The extension reads Chrome's real bookmark tree. The fallback data is only
@@ -101,7 +104,7 @@ const els = Object.fromEntries([
   'favoritesSection','favoritesContent','favoritesToggle',
   'quickList','quickListCount','quickListEmpty','addQuickGroupButton',
   'quickListSection','quickListContent','quickListToggle',
-  'addButton','folderButton','settingsButton','themeButton','manageButton','editorDialog',
+  'addButton','folderButton','settingsButton','themeButton','manageButton','embeddedCloseButton','editorDialog',
   'editorForm','editorEyebrow','editorTitle','kindToggle','nameInput','urlInput','urlField','formError','saveButton',
   'groupDialog','groupForm','groupDialogTitle','groupNameInput','groupFormError','saveGroupButton',
   'settingsDialog','folderChoices','appearanceOptions','contextMenu','toast'
@@ -139,6 +142,7 @@ let toastTimer;
 let refreshTimer;
 let scrollSaveTimer;
 let scrollPersistenceReady=false;
+let panelClosing=false;
 let browserWindowId=null;
 let reloadSequence=0;
 let localMutationDepth=0;
@@ -158,12 +162,23 @@ function applyPopupWidth(browserWidth){
   document.documentElement.style.setProperty('--popup-width',width+'px');
 }
 async function syncPopupWidth(){
-  if(previewMode){applyPopupWidth(window.innerWidth);return;}
+  if(previewMode || embeddedMode){applyPopupWidth(window.innerWidth);return;}
   try{
     const browserWindow=await chrome.windows.getCurrent();
     browserWindowId=browserWindow?.id??null;
     applyPopupWidth(browserWindow?.width);
   }catch(err){console.warn('无法读取浏览器窗口宽度',err);}
+}
+
+async function closePanel(){
+  if(panelClosing)return;
+  panelClosing=true;
+  await saveScrollPosition(true);
+  if(embeddedMode){
+    window.parent.postMessage({source:'safari-style-favorites-popup',type:'close'},'*');
+    return;
+  }
+  window.close();
 }
 
 // Scroll persistence
@@ -173,8 +188,8 @@ function getScrollContainer(){
     && document.body.scrollHeight>document.body.clientHeight;
   return bodyIsScroller?document.body:document.scrollingElement;
 }
-function saveScrollPosition(){
-  if(!scrollPersistenceReady)return Promise.resolve();
+function saveScrollPosition(force=false){
+  if(!scrollPersistenceReady || (panelClosing && !force))return Promise.resolve();
   clearTimeout(scrollSaveTimer);
   scrollSaveTimer=null;
   const scrollTop=getScrollContainer()?.scrollTop||0;
@@ -435,7 +450,7 @@ async function openWebsite(url, newTab=false){
       if(tab?.id!=null)await chrome.tabs.update(tab.id,{url:href});
       else await chrome.tabs.create({url:href,active:true});
     }
-    window.close();
+    await closePanel();
   }catch(err){showError(err);}
 }
 function configureWebsiteLink(link,url){
@@ -1267,7 +1282,12 @@ function openSettings(){
 }
 function bindEvents(){
   document.addEventListener('keydown',event=>{
-    if(event.key==='Escape')hideContextMenu();
+    if(event.key!=='Escape')return;
+    if(!els.contextMenu.classList.contains('hidden')){
+      hideContextMenu();
+      return;
+    }
+    if(embeddedMode && !document.querySelector('dialog[open]'))closePanel().catch(showError);
   });
   document.addEventListener('dragover',handleDocumentDragOver);
   els.addButton.addEventListener('click',()=>openEditor());
@@ -1283,6 +1303,7 @@ function bindEvents(){
   });
   els.settingsButton.addEventListener('click',openSettings);
   els.folderButton.addEventListener('click',openSettings);
+  els.embeddedCloseButton.addEventListener('click',()=>closePanel().catch(showError));
   els.themeButton.addEventListener('click',()=>{
     const theme=document.documentElement.dataset.theme==='dark'?'light':'dark';
     setTheme(theme).catch(showError);
@@ -1293,7 +1314,7 @@ function bindEvents(){
   });
   els.manageButton.addEventListener('click',()=>{
     if(previewMode){showToast('安装扩展后即可打开 Chrome 书签管理器');return;}
-    chrome.tabs.create({url:'chrome://bookmarks/'}).then(()=>window.close()).catch(showError);
+    chrome.tabs.create({url:'chrome://bookmarks/'}).then(closePanel).catch(showError);
   });
   for(const button of document.querySelectorAll('[data-close]')){
     button.addEventListener('click',()=>$(button.dataset.close).close());
@@ -1312,11 +1333,20 @@ function bindEvents(){
   };
   window.addEventListener('scroll',onScroll,{passive:true});
   document.body.addEventListener('scroll',onScroll,{passive:true});
-  window.addEventListener('pagehide',saveScrollPosition);
+  window.addEventListener('pagehide',()=>saveScrollPosition());
   document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState==='hidden')saveScrollPosition();
+    if(document.visibilityState==='hidden' && !panelClosing)saveScrollPosition();
   });
-  window.addEventListener('resize',hideContextMenu);
+  window.addEventListener('resize',()=>{
+    hideContextMenu();
+    if(embeddedMode)applyPopupWidth(window.innerWidth);
+  });
+  window.addEventListener('message',event=>{
+    if(!embeddedMode || event.source!==window.parent)return;
+    if(event.data?.source==='safari-style-favorites-popup' && event.data.type==='request-close'){
+      closePanel().catch(showError);
+    }
+  });
   systemThemeQuery.addEventListener('change',()=>{if(state.theme==='auto')applyTheme();});
   if(!previewMode){
     const refresh=()=>{

@@ -1,6 +1,6 @@
 # Safari 风格收藏夹 · Chrome 工具栏弹出扩展
 
-点击 Chrome 工具栏上的扩展图标，立即弹出 Safari 风格的收藏夹宫格，不再替换你的新标签页。
+点击 Chrome 工具栏上的扩展图标，或在网页中点击鼠标右键，立即弹出 Safari 风格的收藏夹宫格，不再替换你的新标签页。
 
 ## 安装（macOS / Windows）
 
@@ -16,11 +16,15 @@
 5. 点击「加载已解压的扩展程序」，选择**整个** `safari-style-favorites-popup` 文件夹。
 6. **点击地址栏右侧的拼图形状「扩展程序」图标**，找到「Safari 风格收藏夹 · 弹出面板」，点击其右侧的图钉以固定到工具栏。
 7. 点击收藏夹扩展图标，便会在图标下方弹出收藏夹面板。
+8. 也可以在任意普通网页中点击鼠标右键，选择「打开 Safari 风格收藏夹」，收藏夹会在网页正中央打开。点击遮罩、右上角关闭按钮或按 `Esc` 即可关闭。
+9. 使用 `Ctrl+Shift+Y`（Windows/Linux）或 `⌘+Shift+Y`（macOS），也可以在当前网页中央快速打开收藏夹。可在 `chrome://extensions/shortcuts` 修改快捷键。
 
 **如果你安装过旧的“新标签页”版本：** 建议先在 `chrome://extensions` 删除旧扩展，再加载这个版本，避免两个不同扩展同时存在并争用书签显示方式。这样也能恢复 Chrome 原生新标签页。不要从 Chrome 书签管理器删除书签。
 
 ## 功能
 
+- **网页右键打开：** 在 `http` 或 `https` 网页的右键菜单中选择「打开 Safari 风格收藏夹」，收藏夹会以居中浮层显示；无需离开当前网页。
+- **快捷键打开：** 按 `Ctrl+Shift+Y`（Windows/Linux）或 `⌘+Shift+Y`（macOS）打开同一个居中收藏夹；支持在 Chrome 扩展快捷键页面自定义。
 - **打开网站：** 直接点击宫格里的图标会在**当前标签页**打开该网站；`⌘`（macOS）/`Ctrl`（Windows）+ 点击、鼠标中键点击，在新标签页打开。
 - **浏览文件夹：** 单击文件夹进入，点击小路径返回。
 - **记住浏览位置：** 进入文件夹后，下次打开扩展会继续显示上次浏览的文件夹。
@@ -38,7 +42,8 @@
 
 ## 隐私和权限
 
-- 只请求 Chrome 的 `bookmarks`、`storage`、`favicon` 权限。书签直接从 Chrome 读取，不会上传到开发者服务器。
+- 请求 Chrome 的 `bookmarks`、`storage`、`favicon`、`contextMenus`、`scripting` 和 `activeTab` 权限。书签直接从 Chrome 读取，不会上传到开发者服务器。
+- `activeTab` 和 `scripting` 仅在你主动点击扩展的网页右键菜单项后，用于把收藏夹浮层显示在当前标签页；扩展不会持续读取网页内容。
 - Chrome 自带的 `_favicon` 接口提供网站小图标；不依赖外部图标接口。
 - 不加载外部脚本、样式或字体。外观选择、首页文件夹、上次浏览位置、折叠状态及快捷分组保存在 `chrome.storage.local`。
 - 添加、编辑和删除书签操作会更改 Chrome **实际书签**；如果开启 Chrome 书签同步，也遵循同步设置。
@@ -46,6 +51,8 @@
 ## 文件说明
 
 - `manifest.json`：Manifest V3，使用 `action.default_popup` 配置点击扩展时弹窗
+- `background.js`：注册网页右键菜单，并在用户点击后触发居中收藏夹
+- `content.js`：在当前网页中创建隔离的收藏夹遮罩和居中面板
 - `popup.html`：弹出收藏夹界面
 - `styles.css`：Safari 风格设计和弹出面板布局
 - `app.js`：Chrome 书签、文件夹导航、编辑及外观功能
