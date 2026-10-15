@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN" class="popup-view">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>收藏夹 · Safari 风格弹出面板</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <div class="ambient ambient-three" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand" aria-label="Safari 风格收藏夹">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="12" stroke="currentColor" stroke-width="1.65"/><path d="M19.7 12.3 17.3 18l-5.6 2.4 2.4-5.7 5.6-2.4Z" fill="currentColor"/><circle cx="16" cy="16" r="1.5" fill="#fff"/></svg>
+      </span>
+      <div><strong>个人收藏</strong><span>FAVORITES</span></div>
+    </div>
+    <div class="toolbar">
+      <button class="toolbar-btn" id="themeButton" type="button" title="切换明暗外观" aria-label="切换明暗外观">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z"/></svg>
+      </button>
+      <button class="toolbar-btn" id="manageButton" type="button" title="Chrome 书签管理器" aria-label="Chrome 书签管理器">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.8A1.8 1.8 0 0 1 6.8 3h10.4A1.8 1.8 0 0 1 19 4.8V21l-7-4.8L5 21V4.8Z"/></svg>
+      </button>
+      <button class="toolbar-btn" id="settingsButton" type="button" title="收藏夹设置" aria-label="收藏夹设置">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.3a3.3 3.3 0 1 0 0-6.6 3.3 3.3 0 0 0 0 6.6Z"/><path d="m19.2 13.4 1.4 1.1-1.6 2.8-1.7-.6a7.6 7.6 0 0 1-2.2 1.3l-.3 1.8h-3.2l-.3-1.8a7.6 7.6 0 0 1-2.2-1.3l-1.7.6-1.6-2.8 1.4-1.1a8.1 8.1 0 0 1 0-2.8L5.8 9.5l1.6-2.8 1.7.6a7.6 7.6 0 0 1 2.2-1.3l.3-1.8h3.2l.3 1.8a7.6 7.6 0 0 1 2.2 1.3l1.7-.6 1.6 2.8-1.4 1.1a8.1 8.1 0 0 1 0 2.8Z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <section class="favorites-section" id="favoritesSection" aria-label="收藏夹">
+      <div class="section-heading">
+        <div>
+          <div class="section-kicker">
+            <button class="collapse-button" id="favoritesToggle" type="button" aria-expanded="true" aria-controls="favoritesContent" title="折叠收藏夹" aria-label="折叠收藏夹">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <span>收藏夹</span><span class="count-chip" id="countChip">0</span>
+          </div>
+          <nav id="breadcrumbs" aria-label="书签文件夹路径" class="breadcrumbs"></nav>
+        </div>
+        <div class="section-actions">
+          <button class="subtle-action" id="folderButton" type="button" title="切换显示的书签文件夹">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg>
+            <span>文件夹</span>
+          </button>
+          <button class="primary-action" id="addButton" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            <span>添加</span>
+          </button>
+        </div>
+      </div>
+      <div class="collapsible-content" id="favoritesContent">
+        <div class="tiles-grid" id="tilesGrid" aria-live="polite"></div>
+        <div class="empty-state hidden" id="emptyState">
+          <div class="empty-symbol" id="emptySymbol">✧</div>
+          <h2 id="emptyTitle">这里暂时没有收藏</h2>
+          <p id="emptyDescription">添加一个喜欢的网站，开启你的收藏空间。</p>
+          <button type="button" id="emptyAddButton" class="empty-add">添加第一个收藏 <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="quick-list-section" id="quickListSection" aria-labelledby="quickListTitle">
+      <div class="quick-list-heading">
+        <div class="section-kicker">
+          <button class="collapse-button" id="quickListToggle" type="button" aria-expanded="true" aria-controls="quickListContent" title="折叠快捷列表" aria-label="折叠快捷列表">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <span id="quickListTitle">快捷列表</span><span class="count-chip" id="quickListCount">0</span>
+        </div>
+        <div class="quick-list-controls">
+          <span class="quick-list-hint">拖动图标或分组名称调整位置</span>
+          <button class="primary-action quick-group-add" id="addQuickGroupButton" type="button" title="新增快捷分组">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            <span>新增分组</span>
+          </button>
+        </div>
+      </div>
+      <div class="collapsible-content" id="quickListContent">
+        <div class="quick-groups" id="quickList" aria-live="polite"></div>
+        <div class="quick-list-empty" id="quickListEmpty">
+          <span class="quick-list-empty-icon" aria-hidden="true">＋</span>
+          <span>新增一个分组，再将网站图标拖入其中</span>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">拖动收藏排序或加入快捷分组 · 拖动快捷图标可换组</footer>
+  </main>
+
+  <dialog id="editorDialog" class="sheet" aria-labelledby="editorTitle">
+    <form id="editorForm" class="sheet-inner">
+      <div class="sheet-header">
+        <div><p class="sheet-eyebrow" id="editorEyebrow">YOUR FAVORITES</p><h2 id="editorTitle">添加收藏</h2></div>
+        <button class="close-button" type="button" data-close="editorDialog" aria-label="关闭">×</button>
+      </div>
+      <div class="kind-toggle" id="kindToggle" role="group" aria-label="收藏类型">
+        <button type="button" class="kind-button selected" data-kind="bookmark">网站</button>
+        <button type="button" class="kind-button" data-kind="folder">文件夹</button>
+      </div>
+      <label class="field-label" for="nameInput">名称</label>
+      <input class="text-field" id="nameInput" maxlength="120" placeholder="例如：Apple" required />
+      <div id="urlField">
+        <label class="field-label" for="urlInput">网站地址</label>
+        <input class="text-field" id="urlInput" type="text" inputmode="url" placeholder="https://www.apple.com" />
+      </div>
+      <p class="form-error hidden" id="formError" role="alert"></p>
+      <div class="sheet-actions"><button type="button" class="cancel-btn" data-close="editorDialog">取消</button><button type="submit" class="save-btn" id="saveButton">添加</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="groupDialog" class="sheet" aria-labelledby="groupDialogTitle">
+    <form id="groupForm" class="sheet-inner">
+      <div class="sheet-header">
+        <div><p class="sheet-eyebrow">QUICK LIST</p><h2 id="groupDialogTitle">新增分组</h2></div>
+        <button class="close-button" type="button" data-close="groupDialog" aria-label="关闭">×</button>
+      </div>
+      <label class="field-label" for="groupNameInput">分组名称</label>
+      <input class="text-field" id="groupNameInput" maxlength="40" placeholder="例如：常用工具" required />
+      <p class="form-error hidden" id="groupFormError" role="alert"></p>
+      <div class="sheet-actions"><button type="button" class="cancel-btn" data-close="groupDialog">取消</button><button type="submit" class="save-btn" id="saveGroupButton">创建</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="settingsDialog" class="sheet settings-sheet" aria-labelledby="settingsTitle">
+    <div class="sheet-inner">
+      <div class="sheet-header"><div><p class="sheet-eyebrow">PREFERENCES</p><h2 id="settingsTitle">收藏夹设置</h2></div><button class="close-button" type="button" data-close="settingsDialog" aria-label="关闭">×</button></div>
+      <div class="setting-group"><h3>显示哪个书签文件夹？</h3><p>默认使用 Chrome「书签栏」，也可以选择任意文件夹。</p><div id="folderChoices" class="folder-choices"></div></div>
+      <div class="setting-group appearance-group"><h3>外观</h3><div class="appearance-options" id="appearanceOptions"><button type="button" data-theme="auto">跟随系统</button><button type="button" data-theme="light">浅色</button><button type="button" data-theme="dark">深色</button></div></div>
+      <p class="settings-note">Chrome 书签仍保存在原有书签系统中；快捷列表是本地独立副本，编辑或删除不会修改原书签。</p>
+    </div>
+  </dialog>
+
+  <div id="contextMenu" class="context-menu hidden" role="menu" aria-label="项目操作"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

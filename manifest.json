@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Safari 风格收藏夹 · 弹出面板",
+  "short_name": "Safari 收藏夹",
+  "version": "1.1.0",
+  "description": "点击 Chrome 工具栏图标，即可弹出 Safari 风格收藏夹；直接使用现有 Chrome 书签。",
+  "minimum_chrome_version": "104",
+  "permissions": [
+    "bookmarks",
+    "storage",
+    "favicon"
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "打开收藏夹",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  }
+}
