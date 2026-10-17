@@ -14,6 +14,7 @@
   let iframe = null;
   let messageHandler = null;
   let keyHandler = null;
+  let visibilityHandler = null;
   let closeFallbackTimer = null;
 
   function close() {
@@ -22,10 +23,10 @@
     closeFallbackTimer = null;
     window.removeEventListener('message', messageHandler);
     document.removeEventListener('keydown', keyHandler, true);
+    document.removeEventListener('visibilitychange', visibilityHandler);
     host.remove();
     host = null;
     iframe = null;
-    delete globalThis[INSTANCE_KEY];
   }
 
   function requestClose() {
@@ -159,13 +160,23 @@
         requestClose();
       }
     };
+    visibilityHandler = () => {
+      if (document.visibilityState === 'hidden') requestClose();
+    };
     window.addEventListener('message', messageHandler);
     document.addEventListener('keydown', keyHandler, true);
+    document.addEventListener('visibilitychange', visibilityHandler);
 
     dialog.append(iframe, loading);
     shadow.append(style, backdrop, dialog);
     document.documentElement.append(host);
   }
+
+  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message?.source !== MESSAGE_SOURCE || message.type !== 'show') return;
+    show();
+    sendResponse({handled: true});
+  });
 
   globalThis[INSTANCE_KEY] = {show, close: requestClose};
   show();

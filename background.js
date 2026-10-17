@@ -2,9 +2,21 @@
 
 const CONTEXT_MENU_ID = 'open-safari-favorites';
 const OPEN_FAVORITES_COMMAND = 'open-safari-favorites';
+const MESSAGE_SOURCE = 'safari-style-favorites-popup';
 
 async function showFavoritesInTab(tabId) {
   if (!Number.isInteger(tabId)) return;
+
+  try {
+    const response = await chrome.tabs.sendMessage(tabId, {
+      source: MESSAGE_SOURCE,
+      type: 'show'
+    });
+    if (response?.handled) return;
+  } catch {
+    // No content script is present on the first opening.
+  }
+
   try {
     await chrome.scripting.executeScript({
       target: {tabId},
@@ -32,8 +44,13 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   showFavoritesInTab(tab.id);
 });
 
-chrome.commands.onCommand.addListener(async (command) => {
+chrome.commands.onCommand.addListener(async (command, tab) => {
   if (command !== OPEN_FAVORITES_COMMAND) return;
-  const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
-  await showFavoritesInTab(tab?.id);
+  if (Number.isInteger(tab?.id)) {
+    await showFavoritesInTab(tab.id);
+    return;
+  }
+
+  const [activeTab] = await chrome.tabs.query({active: true, currentWindow: true});
+  await showFavoritesInTab(activeTab?.id);
 });

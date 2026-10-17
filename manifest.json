@@ -3,7 +3,7 @@
   "name": "Safari 风格收藏夹 · 弹出面板",
   "short_name": "Safari 收藏夹",
   "version": "1.2.0",
-  "description": "点击工具栏图标或网页右键菜单，即可打开 Safari 风格收藏夹；直接使用现有 Chrome 书签。",
+  "description": "通过工具栏图标、网页右键菜单或快捷键打开 Safari 风格收藏夹；直接使用现有 Chrome 书签。",
   "minimum_chrome_version": "104",
   "permissions": [
     "bookmarks",
